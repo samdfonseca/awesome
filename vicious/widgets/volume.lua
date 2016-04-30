@@ -27,7 +27,15 @@ local function worker(format, warg)
     }
 
     -- Get mixer control contents
-    local f = io.popen("amixer -M -c 1 get " .. helpers.shellquote(warg))
+    local availablecards = tonumber(io.popen("aplay -l | grep card | wc -l"):read("*l"))
+    local c = "0"
+    for i=0,availablecards-1 do
+        if io.popen("amixer -c " .. i .. " scontrols | grep Master | wc -l"):read("*l") == "1" then
+            c = tostring(i)
+            break
+        end
+    end
+    local f = io.popen("amixer -M -c " .. c .. " get " .. helpers.shellquote(warg))
     local mixer = f:read("*all")
     f:close()
 

@@ -153,7 +153,6 @@ setvolicon(false)
 --
 -- Volume %
 volpct = wibox.widget.textbox()
--- vicious.register(volpct, vicious.widgets.volume, "$1%", nil, "Master")
 vicious.register(volpct, vicious.widgets.volume, function(widget, args)
     if args[2] == "♫" then
         setvolicon(false)
@@ -164,17 +163,25 @@ vicious.register(volpct, vicious.widgets.volume, function(widget, args)
 end, nil, "Master")
 --
 -- Buttons
+local availablecards = tonumber(io.popen("aplay -l | grep card | wc -l"):read("*l"))
+local c = "0"
+for i=0,availablecards-1 do
+    if io.popen("amixer -c " .. i .. " scontrols | grep Master | wc -l"):read("*l") == "1" then
+        c = tostring(i)
+        break
+    end
+end
 volicon:buttons(awful.util.table.join(
   awful.button({ }, 1, function()
-      awful.util.spawn_with_shell("amixer -q -c 1 set Master toggle")
+      awful.util.spawn_with_shell("amixer -q -c ".. c .. " set Master toggle")
     end
   ),
   awful.button({ }, 4, function()
-      awful.util.spawn_with_shell("amixer -q -c 1 set Master 1%+ unmute")
+      awful.util.spawn_with_shell("amixer -q -c ".. c .. " set Master 1%+ unmute")
     end
   ),
   awful.button({ }, 5, function()
-      awful.util.spawn_with_shell("amixer -q -c 1 set Master 1%- unmute")
+      awful.util.spawn_with_shell("amixer -q -c ".. c .. " set Master 1%- unmute")
     end
   )
 ))
@@ -218,6 +225,10 @@ vicious.register(mailwidget, vicious.widgets.gmail,
 wifiicon = wibox.widget.imagebox()
 wifiicon:set_image(beautiful.widget_wifi)
 --
+wifidev = os.getenv('AWESOME_WIFI_DEVICE')
+if wifidev == nil then
+    wifidev = io.popen('iwconfig | grep "IEEE 802.11" | cut -d " " -f 1'):read("*l")
+end
 wifi = wibox.widget.textbox()
-vicious.register(wifi, vicious.widgets.wifi, "${ssid} Rate: ${rate}MB/s Link: ${link}%", 3, "wlp2s0")
+vicious.register(wifi, vicious.widgets.wifi, "${ssid} Rate: ${rate}MB/s Link: ${link}%", 3, wifidev)
 -- End Wifi }}}
