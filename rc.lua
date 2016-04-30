@@ -493,8 +493,6 @@ awful.rules.rules = {
       properties = { tag = tags[1][5] } },
     { rule = { class = "Gns3" },
       properties = { tag = tags[1][5] } },
-    { rule = { class = "Bitcoin-qt" },
-      properties = { tag = tags[1][9] } },
     { rule = { class = "luakit" },
       properties = { tag = tags[1][2] } },
     -- Set Firefox to always map on tags number 2 of screen 1.

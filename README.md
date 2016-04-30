@@ -1,17 +1,11 @@
 Awesome-3.5
 ==================
 
-[![Gratipay](http://img.shields.io/gratipay/setkeh.svg)](https://gratipay.com/setkeh/)
-
 Awesome Configs updated to 3.5
-
-I have Finally cleaned up the Config slightly
 
 All the Extra widgets that were custom written have now been moved to ./widgets
 
 Vicious widgets are still where they are supposed to be.
-
-I have also updated the bitcoin widget to no longer use the Defunct MtGox api and instead replaced it with https://bitcoinaverage.com/api
 
 Though you will still need to add these to wi.lua yourself if you intend on using the widgets in ./widgets
 
@@ -19,9 +13,7 @@ Though you will still need to add these to wi.lua yourself if you intend on usin
 
 To use this config it needs to be placed in $HOME/.config/awesome the easiest way to do this is:
 
-	git clone --recursive https://github.com/setkeh/Awesome-3.5.git $HOME/.config/awesome
-
-The --recursive is required due to the configs reliance on vicious which i have added as a submodule. (If you have cloned the repo and the vicious directory is empty you can re clone the repo or update the submodule to ull the full repo)
+	git clone https://github.com/samdfonseca/awesome.git $HOME/.config/awesome
 
 The config should be pretty Self explanitory though if you have issues please post an issue.
 
@@ -39,6 +31,3 @@ Once you have Cloned the repo and are running this config for the first time you
 	
 and restart Awesome you can then select them from the drop down list.
 
----
-
-Fork, Share, Have Fun :)
