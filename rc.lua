@@ -113,19 +113,17 @@ if beautiful.wallpaper then
 end
 -- }}}
 
--- {{{ Tags
--- Define a tag table which hold all screen tags.
 tags = {
  names = { 
-         '☭:Terminator',
-         '⚡:Terminator 2', 
-         '♨:Chrome', 
-         '☠:Vim',  
-         '☃:Docs', 
-         '⌥:Email', 
-         '⌘:Other',
-         '✇:Other',
-         '✣:Other',
+         '☭:T',
+         '⚡:T2', 
+         '♨:C', 
+         '☠:V',  
+         '☃:D', 
+         '⌥:E', 
+         '⌘:O1',
+         '✇:O2',
+         '✣:O3',
   },
   layout = {
     layouts[10],  -- 1:terminator
@@ -147,33 +145,41 @@ end
 
 -- Wallpaper Changer Based On 
 -- menu icon menu pdq 07-02-2012
- local wallmenu = {}
- local function wall_load(wall)
- local f = io.popen('ln -sfn ' .. home_path .. '.config/awesome/wallpapers/' .. wall .. ' ' .. home_path .. '.config/awesome/themes/default/bg.png')
- awesome.restart()
- end
- local function wall_menu()
- local f = io.popen('ls -1 ' .. home_path .. '.config/awesome/wallpapers/')
- for l in f:lines() do
+local wallmenu = {}
+local function wall_load(wall)
+local f = io.popen('ln -sfn ' .. home_path .. '.config/awesome/wallpapers/' .. wall .. ' ' .. home_path .. '.config/awesome/themes/default/bg.png')
+awesome.restart()
+end
+local function wall_menu()
+local f = io.popen('ls -1 ' .. home_path .. '.config/awesome/wallpapers/')
+for l in f:lines() do
 local item = { l, function () wall_load(l) end }
- table.insert(wallmenu, item)
- end
- f:close()
- end
- wall_menu()
+table.insert(wallmenu, item)
+end
+f:close()
+end
+wall_menu()
 
 -- Widgets 
 
-spacer       = wibox.widget.textbox()
+spacer = wibox.widget.textbox()
 spacer:set_text(' | ')
 
 --Weather Widget
 weather = wibox.widget.textbox()
-vicious.register(weather, vicious.widgets.weather, "Weather: ${city}. Sky: ${sky}. Temp: ${tempc}c Humid: ${humid}%. Wind: ${windkmh} KM/h", 1200, "KATT")
+vicious.register(weather,
+                 vicious.widgets.weather,
+                 "Weather: ${city}. Sky: ${sky}. Temp: ${tempc}c Humid: ${humid}%. Wind: ${windkmh} KM/h",
+                 1200,
+                 "KATT")
 
 --Battery Widget
 batt = wibox.widget.textbox()
-vicious.register(batt, vicious.widgets.bat, "Batt: $2% Rem: $3", 61, "BAT1")
+vicious.register(batt,
+                 vicious.widgets.bat,
+                 "Batt: $2% Rem: $3",
+                 61,
+                 "BAT0")
 
 
 -- {{{ Menu
