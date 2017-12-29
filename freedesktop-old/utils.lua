@@ -7,13 +7,13 @@ local type = type
 local ipairs = ipairs
 local pairs = pairs
 
-local utils = {}
+module("freedesktop.utils")
 
-utils.terminal = 'xterm'
+terminal = 'xterm'
 
-utils.icon_theme = nil
+icon_theme = nil
 
-utils.all_icon_sizes = {
+all_icon_sizes = {
     '128x128',
     '96x96',
     '72x72',
@@ -25,7 +25,7 @@ utils.all_icon_sizes = {
     '22x22',
     '16x16'
 }
-utils.all_icon_types = {
+all_icon_types = {
     'apps',
     'actions',
     'devices',
@@ -34,13 +34,13 @@ utils.all_icon_types = {
     'status',
     'mimetypes'
 }
-utils.all_icon_paths = { os.getenv("HOME") .. '/.icons/', '/usr/share/icons/' }
+all_icon_paths = { os.getenv("HOME") .. '/.icons/', '/usr/share/icons/' }
 
-utils.icon_sizes = {}
+icon_sizes = {}
 
 local mime_types = {}
 
-function utils.get_lines(...)
+function get_lines(...)
     local f = io.popen(...)
     return function () -- iterator
         local data = f:read()
@@ -49,7 +49,7 @@ function utils.get_lines(...)
     end
 end
 
-function utils.file_exists(filename)
+function file_exists(filename)
     local file = io.open(filename, 'r')
     local result = (file ~= nil)
     if result then
@@ -58,7 +58,7 @@ function utils.file_exists(filename)
     return result
 end
 
-function utils.lookup_icon(arg)
+function lookup_icon(arg)
     if arg.icon:sub(1, 1) == '/' and (arg.icon:find('.+%.png') or arg.icon:find('.+%.xpm')) then
         -- icons with absolute path and supported (AFAICT) formats
         return arg.icon
@@ -79,14 +79,14 @@ function utils.lookup_icon(arg)
         end
         table.insert(icon_theme_paths, '/usr/share/icons/hicolor/') -- fallback theme cf spec
 
-        local isizes = utils.icon_sizes
-        for i, sz in ipairs(utils.all_icon_sizes) do
+        local isizes = icon_sizes
+        for i, sz in ipairs(all_icon_sizes) do
             table.insert(isizes, sz)
         end
 
         for i, icon_theme_directory in ipairs(icon_theme_paths) do
             for j, size in ipairs(arg.icon_sizes or isizes) do
-                for k, icon_type in ipairs(utils.all_icon_types) do
+                for k, icon_type in ipairs(all_icon_types) do
                     table.insert(icon_path, icon_theme_directory .. size .. '/' .. icon_type .. '/')
                 end
             end
@@ -99,16 +99,16 @@ function utils.lookup_icon(arg)
         for i, directory in ipairs(icon_path) do
             if (arg.icon:find('.+%.png') or arg.icon:find('.+%.xpm')) and file_exists(directory .. arg.icon) then
                 return directory .. arg.icon
-            elseif utils.file_exists(directory .. arg.icon .. '.png') then
+            elseif file_exists(directory .. arg.icon .. '.png') then
                 return directory .. arg.icon .. '.png'
-            elseif utils.file_exists(directory .. arg.icon .. '.xpm') then
+            elseif file_exists(directory .. arg.icon .. '.xpm') then
                 return directory .. arg.icon .. '.xpm'
             end
         end
     end
 end
 
-function utils.lookup_file_icon(arg)
+function lookup_file_icon(arg)
     load_mime_types()
 
     local extension = arg.filename:match('%a+$')
@@ -137,7 +137,7 @@ end
 
 --- Load system MIME types
 -- @return A table with file extension <--> MIME type mapping
-function utils.load_mime_types()
+function load_mime_types()
     if #mime_types == 0 then
         for line in io.lines('/etc/mime.types') do
             if not line:find('^#') then
@@ -159,7 +159,7 @@ end
 -- @param file The .desktop file
 -- @param requested_icon_sizes A list of icon sizes (optional). If this list is given, it will be used as a priority list for icon sizes when looking up for icons. If you want large icons, for example, you can put '128x128' as the first item in the list.
 -- @return A table with file entries.
-function utils.parse_desktop_file(arg)
+function parse_desktop_file(arg)
     local program = { show = true, file = arg.file }
     for line in io.lines(arg.file) do
         for key, value in line:gmatch("(%w+)=(.+)") do
@@ -212,7 +212,7 @@ end
 -- @param dir The directory.
 -- @param icons_size, The icons sizes, optional.
 -- @return A table with all .desktop entries.
-function utils.parse_desktop_files(arg)
+function parse_desktop_files(arg)
     local programs = {}
     local files = get_lines('find '.. arg.dir ..' -name "*.desktop" 2>/dev/null')
     for file in files do
@@ -226,7 +226,7 @@ end
 -- @param dir The directory.
 -- @param icons_size, The icons sizes, optional.
 -- @return A table with all .desktop entries.
-function utils.parse_dirs_and_files(arg)
+function parse_dirs_and_files(arg)
     local files = {}
     local paths = get_lines('find '..arg.dir..' -maxdepth 1 -type d')
     for path in paths do
@@ -253,4 +253,3 @@ function utils.parse_dirs_and_files(arg)
     return files
 end
 
-return utils

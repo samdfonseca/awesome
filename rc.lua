@@ -16,8 +16,9 @@ beautiful.init( awful.util.getdir("config") .. "/themes/default/theme.lua" )
 local naughty = require("naughty")
 local menubar = require("menubar")
 --FreeDesktop
-require('freedesktop.utils')
-require('freedesktop.menu')
+local freedesktop = require('freedesktop')
+-- require('freedesktop.utils')
+-- require('freedesktop.menu')
 freedesktop.utils.icon_theme = 'gnome'
 --Vicious + Widgets 
 vicious = require("vicious")
@@ -27,7 +28,7 @@ local wi = require("wi")
 _awesome_quit = awesome.quit
 awesome.quit = function()
     if os.getenv("DESKTOP_SESSION") == "awesome-gnome" then
-        os.execute("/usr/bin/gnome-session-quit")
+        os.execute("pkill -9 gnome-session")
     else
         _awesome_quit()
     end
@@ -147,16 +148,16 @@ end
 -- menu icon menu pdq 07-02-2012
 local wallmenu = {}
 local function wall_load(wall)
-local f = io.popen('ln -sfn ' .. home_path .. '.config/awesome/wallpapers/' .. wall .. ' ' .. home_path .. '.config/awesome/themes/default/bg.png')
-awesome.restart()
+  local f = io.popen('ln -sfn ' .. home_path .. '.config/awesome/wallpapers/' .. wall .. ' ' .. home_path .. '.config/awesome/themes/default/bg.png')
+  awesome.restart()
 end
 local function wall_menu()
-local f = io.popen('ls -1 ' .. home_path .. '.config/awesome/wallpapers/')
-for l in f:lines() do
-local item = { l, function () wall_load(l) end }
-table.insert(wallmenu, item)
-end
-f:close()
+  local f = io.popen('ls -1 ' .. home_path .. '.config/awesome/wallpapers/')
+  for l in f:lines() do
+    local item = { l, function () wall_load(l) end }
+    table.insert(wallmenu, item)
+  end
+  f:close()
 end
 wall_menu()
 
@@ -185,21 +186,21 @@ vicious.register(batt,
 -- {{{ Menu
 -- Create a laucher widget and a main menu
 
-menu_items = freedesktop.menu.new()
+menu_items = freedesktop.menu.build()
 myawesomemenu = {
    { "manual", terminal .. " -e man awesome", freedesktop.utils.lookup_icon({ icon = 'help' }) },
    { "edit config", editor_cmd .. " " .. awesome.conffile, freedesktop.utils.lookup_icon({ icon = 'package_settings' }) },
    { "restart", awesome.restart, freedesktop.utils.lookup_icon({ icon = 'system-shutdown' }) },
-   { "quit", awesome.quit, freedesktop.utils.lookup_icon({ icon = 'system-shutdown' }) }
-       }
+   { "quit", function() awesome.quit() end, freedesktop.utils.lookup_icon({ icon = 'system-shutdown' }) }
+}
 
-        table.insert(menu_items, { "Awesome", myawesomemenu, beautiful.awesome_icon })
-        table.insert(menu_items, { "Wallpaper", wallmenu, freedesktop.utils.lookup_icon({ icon = 'gnome-settings-background' })}) 
+table.insert(menu_items, { "Awesome", myawesomemenu, beautiful.awesome_icon })
+table.insert(menu_items, { "Wallpaper", wallmenu, freedesktop.utils.lookup_icon({ icon = 'gnome-settings-background' })})
 
-        mymainmenu = awful.menu({ items = menu_items, width = 150 })
-
-mylauncher = awful.widget.launcher({ image = beautiful.awesome_icon,
-                                     menu = mymainmenu })
+-- mymainmenu = awful.menu({ items = menu_items, menu_width = 150 })
+-- 
+-- mylauncher = awful.widget.launcher({ image = beautiful.awesome_icon,
+--                                      menu = mymainmenu })
 
 -- Menubar configuration
 menubar.utils.terminal = terminal -- Set the terminal for applications that require it
@@ -207,7 +208,7 @@ menubar.utils.terminal = terminal -- Set the terminal for applications that requ
 
 -- {{{ Wibox
 -- Create a textclock widget
-mytextclock = awful.widget.textclock()
+mytextclock = wibox.widget.textclock()
 
 -- Create a wibox for each screen and add it
 mywibox = {}
@@ -276,11 +277,11 @@ for s = 1, screen.count() do
     mytasklist[s] = awful.widget.tasklist(s, awful.widget.tasklist.filter.currenttags, mytasklist.buttons)
 
     -- Create the wibox
-    mywibox[s] = awful.wibox({ position = "top", screen = s })
+    mywibox[s] = awful.wibar({ position = "top", screen = s })
 
     -- Widgets that are aligned to the left
     local left_layout = wibox.layout.fixed.horizontal()
-    left_layout:add(mylauncher)
+    -- left_layout:add(mylauncher)
     left_layout:add(mytaglist[s])
     left_layout:add(mypromptbox[s])
 
@@ -313,7 +314,7 @@ for s = 1, screen.count() do
    mywibox[s]:set_widget(layout)
    
    -- Create the bottom wibox
-     myinfowibox[s] = awful.wibox({ position = "bottom", screen = s })
+     myinfowibox[s] = awful.wibar({ position = "bottom", screen = s })
    -- Widgets that are aligned to the bottom
     local bottom_layout = wibox.layout.fixed.horizontal()
     bottom_layout:add(cpuicon)
@@ -361,7 +362,7 @@ globalkeys = awful.util.table.join(
             awful.client.focus.byidx(-1)
             if client.focus then client.focus:raise() end
         end),
-    awful.key({ }, "Print", function () awful.util.spawn("upload_screens scr") end),
+    awful.key({ }, "Print", function () awful.spawn("upload_screens scr") end),
 
     -- Layout manipulation
     awful.key({ modkey, "Shift"   }, "j", function () awful.client.swap.byidx(  1)    end),
@@ -378,7 +379,7 @@ globalkeys = awful.util.table.join(
         end),
 
     -- Standard program
-    awful.key({ modkey,           }, "Return", function () awful.util.spawn(terminal) end),
+    awful.key({ modkey,           }, "Return", function () awful.spawn(terminal) end),
     awful.key({ modkey, "Control" }, "r", awesome.restart),
     awful.key({ modkey, "Shift"   }, "q", awesome.quit),
 
@@ -390,7 +391,7 @@ globalkeys = awful.util.table.join(
     awful.key({ modkey, "Control" }, "l",     function () awful.tag.incncol(-1)         end),
     awful.key({ modkey,           }, "space", function () awful.layout.inc(layouts,  1) end),
     awful.key({ modkey, "Shift"   }, "space", function () awful.layout.inc(layouts, -1) end),
-    awful.key({ modkey,           }, "w",     function () awful.util.spawn("luakit")    end, "Start Luakit Web Browser"),
+    awful.key({ modkey,           }, "w",     function () awful.spawn("luakit")    end, "Start Luakit Web Browser"),
 
     awful.key({ modkey, "Control" }, "n", awful.client.restore),
 
